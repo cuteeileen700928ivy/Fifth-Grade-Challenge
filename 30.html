@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>小五學霸特工學院 - 每日30分鐘全科大冒險</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <style>
+    body {
+      font-family: 'Inter', 'Noto Sans TC', sans-serif;
+      user-select: none;
+    }
+    .neon-border-cyan {
+      box-shadow: 0 0 15px rgba(6, 182, 212, 0.45);
+    }
+    .neon-border-purple {
+      box-shadow: 0 0 15px rgba(168, 85, 247, 0.45);
+    }
+    .neon-border-amber {
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.45);
+    }
+    @keyframes pulse-slow {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.03); opacity: 0.9; }
+    }
+    .pulse-animation {
+      animation: pulse-slow 2s infinite ease-in-out;
+    }
+    .sniper-char {
+      display: inline-block;
+      padding: 3px 6px;
+      margin: 3px 2px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1.45rem;
+      line-height: 1.6;
+      font-weight: 600;
+      transition: all 0.15s ease;
+    }
+    @media (min-width: 768px) {
+      .sniper-char {
+        font-size: 1.75rem;
+        padding: 4px 8px;
+        margin: 4px 3px;
+      }
+    }
+    .sniper-char:hover {
+      background-color: rgba(6, 182, 212, 0.25);
+      transform: translateY(-2px);
+    }
+    .sniper-char.hit-correct {
+      background-color: rgba(16, 185, 129, 0.4);
+      color: #34d399;
+      text-decoration: line-through;
+      pointer-events: none;
+    }
+    .sniper-char.hit-wrong {
+      background-color: rgba(239, 68, 68, 0.4);
+      color: #f87171;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-cyan-500 selection:text-white">
+
+  <!-- Top Navigation & Stats Bar -->
+  <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40 px-4 py-3">
+    <div class="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <!-- Title & Agent Info -->
+      <div class="flex items-center space-x-3">
+        <div id="agent-avatar" class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-xl shadow-lg shadow-cyan-500/20">
+          🚀
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <span id="agent-name-display" class="font-extrabold text-cyan-400 text-sm md:text-base">特工 007</span>
+            <span id="agent-rank" class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-amber-300 border border-amber-500/30 font-semibold">Lv.1 菜鳥探員</span>
+          </div>
+          <div class="text-xs text-slate-400 flex items-center gap-2 mt-0.5">
+            <span>EXP: <strong id="exp-val" class="text-emerald-400">0</strong>/100</span>
+            <div class="w-20 bg-slate-800 rounded-full h-1.5 overflow-hidden">
+              <div id="exp-bar" class="bg-emerald-400 h-full w-0 transition-all duration-300"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Counters & Controls -->
+      <div class="flex items-center space-x-2 md:space-x-3">
+        <!-- Shield / HP -->
+        <div class="bg-slate-800/80 px-2.5 py-1.5 rounded-lg border border-slate-700/80 flex items-center space-x-1.5 text-xs md:text-sm">
+          <span class="text-rose-400">🛡️ 護盾</span>
+          <span id="hp-display" class="font-bold text-rose-300">100</span>
+        </div>
+
+        <!-- Combo Badge -->
+        <div id="combo-container" class="bg-gradient-to-r from-amber-500/20 to-orange-500/20 px-2.5 py-1.5 rounded-lg border border-amber-500/30 text-xs md:text-sm text-amber-300 font-extrabold flex items-center space-x-1">
+          <span>⚡ 連擊</span>
+          <span id="combo-display">0</span>
+        </div>
+
+        <!-- Audio Toggle Button -->
+        <button id="sound-btn" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition text-sm flex items-center justify-center w-8 h-8" title="音效切換">
+          <span id="sound-icon">🔊</span>
+        </button>
+
+        <!-- Privilege Vault Button -->
+        <button id="vault-nav-btn" class="px-2.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs md:text-sm flex items-center gap-1 shadow-md shadow-amber-500/20 transition">
+          <span>🎒 特權背包</span>
+          <span id="card-badge" class="bg-slate-900 text-amber-300 text-xs px-1.5 py-0.2 rounded-full font-black">2</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-4xl mx-auto w-full p-4 flex-1">
+
+    <!-- View 1: Mission Hub (Lobby) -->
+    <div id="view-hub" class="space-y-6">
+      
+      <!-- Top Banner: Daily 30-Minute Routine -->
+      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-slate-850 to-cyan-950/40 p-5 md:p-6 border border-cyan-500/30 neon-border-cyan">
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-semibold mb-2">
+              <span>⏱️ 每日 30 分鐘高效特訓</span>
+              <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
+              <span>康軒國語 7~12 課 / 翰林數學 / EU 5</span>
+            </div>
+            <h1 class="text-xl md:text-2xl font-black text-white tracking-tight">
+              學霸特工：期末每日 30 分鐘作戰基地
+            </h1>
+            <p class="text-slate-300 text-xs md:text-sm mt-1 max-w-xl leading-relaxed">
+              拒絕枯燥抄寫！每天依課表挑戰約 30 分鐘快速對決，累積經驗解鎖免作業、自選點心特權卡！
+            </p>
+          </div>
+
+          <!-- Quick Day Selector -->
+          <div class="bg-slate-900/90 p-3 rounded-xl border border-slate-700/80 flex flex-col gap-2 min-w-[200px]">
+            <div class="flex items-center justify-between text-xs text-slate-400">
+              <span>今日特戰菜單</span>
+              <span id="today-day-label" class="text-amber-300 font-bold">週一：語文計算日</span>
+            </div>
+            <button id="btn-start-daily-routine" class="w-full py-2 px-3 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs md:text-sm transition flex items-center justify-center gap-1.5 shadow-md shadow-cyan-500/20">
+              <span>🚀 啟動今日 30 分鐘三關連刷</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Agent Name & Profile Selector -->
+        <div class="mt-4 pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div class="flex items-center gap-2">
+            <span class="text-slate-400">特工代號：</span>
+            <input id="agent-input-name" type="text" value="暗影特工" maxlength="8" class="bg-slate-800 text-white border border-slate-700 px-2.5 py-1 rounded-lg text-xs focus:outline-none focus:border-cyan-400 w-28">
+            <button id="update-name-btn" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-2.5 py-1 rounded-lg transition font-medium">更新</button>
+          </div>
+          <div class="flex items-center gap-1.5 text-slate-400">
+            <span>本日總遊玩時長累計：</span>
+            <span id="daily-time-counter" class="text-emerald-400 font-mono font-bold">0 / 30 分鐘</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Weekly 30-Min Schedule Table Modal Trigger -->
+      <div class="bg-slate-900/70 p-4 rounded-xl border border-slate-800 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <span class="text-xl p-2 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">📅</span>
+          <div>
+            <h4 class="text-sm font-bold text-white">週一至週五「30 分鐘特工課表」</h4>
+            <p class="text-xs text-slate-400">科學分配每天兩至三科，保證每週五科全部複習到位！</p>
+          </div>
+        </div>
+        <button id="btn-view-schedule" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-slate-700 transition">
+          查看每日課表 ➔
+        </button>
+      </div>
+
+      <!-- Mode Cards Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        
+        <!-- Mode 1: 國語改錯（抓蟲狙擊戰） -->
+        <div class="bg-slate-900/80 hover:bg-slate-850 rounded-xl p-5 border border-slate-800 hover:border-cyan-500/50 transition cursor-pointer flex flex-col justify-between group" id="btn-mode-sniper">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-3xl p-2 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">🎯</span>
+              <span class="text-xs bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded-full font-bold">康軒 7-12 課改錯</span>
+            </div>
+            <h3 class="font-extrabold text-lg md:text-xl text-white group-hover:text-cyan-400 transition">國語【抓蟲狙擊手】（約8分鐘）</h3>
+            <p class="text-slate-300 text-sm md:text-base mt-2 leading-relaxed">
+              限時狙擊段落錯字！按部就班、再接再厲、名列前茅、因地制宜等高頻易錯陷阱字。
+            </p>
+          </div>
+          <div class="mt-4 flex items-center justify-between text-xs text-cyan-400 font-semibold pt-3 border-t border-slate-800">
+            <span>難度：⭐⭐☆</span>
+            <span class="flex items-center gap-1">出發狙擊 <span>→</span></span>
+          </div>
+        </div>
+
+        <!-- Mode 2: 國語形近字與多音字快射 -->
+        <div class="bg-slate-900/80 hover:bg-slate-850 rounded-xl p-5 border border-slate-800 hover:border-purple-500/50 transition cursor-pointer flex flex-col justify-between group" id="btn-mode-phonetic">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-3xl p-2 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">⚡</span>
+              <span class="text-xs bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full font-bold">字音字形雙抗</span>
+            </div>
+            <h3 class="font-extrabold text-lg md:text-xl text-white group-hover:text-purple-400 transition">國語【字音字形快射】（約8分鐘）</h3>
+            <p class="text-slate-300 text-sm md:text-base mt-2 leading-relaxed">
+              形近字家族（璧/壁、躁/燥、辯/辨/辮）與多音破音字（出差 chāi、著重 zhuó）極速快拆。
+            </p>
+          </div>
+          <div class="mt-4 flex items-center justify-between text-xs text-purple-400 font-semibold pt-3 border-t border-slate-800">
+            <span>難度：⭐⭐☆</span>
+            <span class="flex items-center gap-1">出發快射 <span>→</span></span>
+          </div>
+        </div>
+
+        <!-- Mode 3: 英文 EU 5 過去式快拔槍 -->
+        <div class="bg-slate-900/80 hover:bg-slate-850 rounded-xl p-5 border border-slate-800 hover:border-emerald-500/50 transition cursor-pointer flex flex-col justify-between group" id="btn-mode-english">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-3xl p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">🔫</span>
+              <span class="text-xs bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-bold">EU 5 Unit 2 家事過去式</span>
+            </div>
+            <h3 class="font-extrabold text-lg md:text-xl text-white group-hover:text-emerald-400 transition">英文【特工日常快拔槍】（約8分鐘）</h3>
+            <p class="text-slate-300 text-sm md:text-base mt-2 leading-relaxed">
+              Did you wash the dishes? 過去式問答與不規則動詞（took, cleared, washed）極速對決！
+            </p>
+          </div>
+          <div class="mt-4 flex items-center justify-between text-xs text-emerald-400 font-semibold pt-3 border-t border-slate-800">
+            <span>難度：⭐⭐☆</span>
+            <span class="flex items-center gap-1">出發拔槍 <span>→</span></span>
+          </div>
+        </div>
+
+        <!-- Mode 4: 翰林數學要塞面積防線 -->
+        <div class="bg-slate-900/80 hover:bg-slate-850 rounded-xl p-5 border border-slate-800 hover:border-amber-500/50 transition cursor-pointer flex flex-col justify-between group" id="btn-mode-math">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-3xl p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">📐</span>
+              <span class="text-xs bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full font-bold">翰林五上面積計算</span>
+            </div>
+            <h3 class="font-extrabold text-lg md:text-xl text-white group-hover:text-amber-400 transition">數學【要塞面積防線】（約10分鐘）</h3>
+            <p class="text-slate-300 text-sm md:text-base mt-2 leading-relaxed">
+              平行四邊形、三角形與梯形面積計算！破解底高混淆與是否除以 2 陷阱，築起要塞防護牆。
+            </p>
+          </div>
+          <div class="mt-4 flex items-center justify-between text-xs text-amber-400 font-semibold pt-3 border-t border-slate-800">
+            <span>難度：⭐⭐⭐</span>
+            <span class="flex items-center gap-1">出發築牆 <span>→</span></span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Boss Banner -->
+      <div class="bg-gradient-to-r from-red-950/60 via-slate-900 to-red-950/60 p-5 rounded-2xl border border-red-500/40 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-red-600/20 border border-red-500/40 flex items-center justify-center text-2xl pulse-animation">
+            👾
+          </div>
+          <div>
+            <span class="text-xs text-red-400 font-bold uppercase tracking-wider">週末驗收 / 壓軸挑戰</span>
+            <h3 class="text-base md:text-lg font-black text-white">五科綜合【終極魔王血條戰】（約10分鐘）</h3>
+            <p class="text-slate-400 text-xs">魔王 100 點血量，隨機考驗國語改錯、數學面積、英文時態、自然燃燒與社會史前文化！</p>
+          </div>
+        </div>
+        <button id="btn-mode-boss" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-black text-xs md:text-sm shadow-lg shadow-red-600/30 transition flex items-center justify-center gap-1.5">
+          <span>⚔️ 挑戰終極 Boss</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- View 2: Gameplay Stage (Shared container for modes) -->
+    <div id="view-gameplay" class="hidden space-y-4">
+      <div class="flex items-center justify-between bg-slate-900/80 px-4 py-2.5 rounded-xl border border-slate-800">
+        <button id="btn-back-hub" class="text-xs md:text-sm text-slate-400 hover:text-white flex items-center gap-1 transition">
+          <span>←</span> 返回指揮所
+        </button>
+        <div class="flex items-center space-x-2">
+          <span id="current-mode-tag" class="text-xs font-bold px-2.5 py-1 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+            抓蟲狙擊手
+          </span>
+          <span id="stage-round" class="text-xs text-slate-400">第 1/4 關</span>
+        </div>
+        <div class="text-xs md:text-sm font-mono text-amber-400 flex items-center gap-1 font-bold">
+          <span>⏱️ 關卡倒數:</span>
+          <span id="game-timer">45s</span>
+        </div>
+      </div>
+
+      <!-- Game Stage Card -->
+      <div id="game-stage-card" class="bg-slate-900/90 rounded-2xl p-5 md:p-6 border border-slate-800 shadow-xl min-h-[380px] flex flex-col justify-between">
+        
+        <!-- Prompt / Context Area -->
+        <div id="game-prompt-area" class="space-y-3">
+          <!-- Injected by JS -->
+        </div>
+
+        <!-- Interactive Playground / Options Area -->
+        <div id="game-interactive-area" class="my-5">
+          <!-- Injected by JS -->
+        </div>
+
+        <!-- Feedback & Explanation Display Box -->
+        <div id="solution-box" class="hidden my-3 p-4 md:p-5 rounded-2xl bg-slate-950 border-2 border-emerald-500/80 shadow-2xl text-left space-y-2">
+          <!-- Injected dynamically -->
+        </div>
+
+        <!-- Feedback & Next Action Footer -->
+        <div id="game-feedback-area" class="pt-4 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-3 text-sm min-h-[50px]">
+          <div id="feedback-msg" class="text-slate-300 text-sm md:text-base font-medium flex items-center gap-2">
+            請仔細分析上方題目後進行特工操作...
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="btn-hint-support" class="hidden px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 text-xs md:text-sm font-bold transition flex items-center gap-1">
+              <span>💡</span> <span>呼叫支援 (看解答)</span>
+            </button>
+            <button id="btn-next-question" class="hidden px-6 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-sm md:text-base shadow-md shadow-cyan-500/20 transition">
+              下一關 ➔
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- View 3: Privilege Vault (Backpack) -->
+    <div id="view-vault" class="hidden space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl md:text-2xl font-black text-amber-400 flex items-center gap-2">
+            <span>🎒 特工專屬特權倉庫</span>
+          </h2>
+          <p class="text-slate-400 text-xs mt-1">每完成每日 30 分鐘任務或升級獲得的特權卡，皆可向老師或家長出示兌換！</p>
+        </div>
+        <button id="btn-vault-back" class="text-xs md:text-sm text-slate-400 hover:text-white flex items-center gap-1 transition">
+          <span>←</span> 返回指揮所
+        </button>
+      </div>
+
+      <!-- Cards Grid -->
+      <div id="vault-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Add Custom Reward Card Modal / Form -->
+      <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 space-y-3">
+        <h4 class="text-sm font-bold text-slate-200">🛠️ 老師 / 家長自訂專屬特權獎勵</h4>
+        <div class="flex flex-wrap gap-2">
+          <input id="custom-card-input" type="text" placeholder="輸入自訂特權（例如：週五自選晚餐、免罰寫一次）" class="bg-slate-800 text-white border border-slate-700 px-3 py-2 rounded-xl text-sm flex-1 focus:outline-none focus:border-amber-400">
+          <button id="btn-add-custom-card" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm rounded-xl transition">
+            新增特權卡
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- In-Page Universal Modal (Replaces blocked alert/confirm) -->
+  <div id="in-page-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
+      <div class="flex items-center space-x-3">
+        <div id="modal-icon" class="text-2xl">✨</div>
+        <h3 id="modal-title" class="text-lg font-bold text-white">訊息通知</h3>
+      </div>
+      <div id="modal-body" class="text-base md:text-lg text-slate-200 leading-relaxed whitespace-pre-line font-medium">
+        通知內容
+      </div>
+      <div class="flex justify-end space-x-3 pt-2">
+        <button id="modal-btn-cancel" class="hidden px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition">
+          取消
+        </button>
+        <button id="modal-btn-confirm" class="px-5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-black transition">
+          確定
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- In-Page Schedule Modal -->
+  <div id="schedule-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl p-5 max-w-lg w-full shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <h3 class="text-base font-bold text-amber-400 flex items-center gap-2">
+          <span>📅</span> <span>每日約 30 分鐘特工攻防課表</span>
+        </h3>
+        <button id="btn-close-schedule" class="text-slate-400 hover:text-white text-sm">✕</button>
+      </div>
+      <div class="space-y-2.5 text-xs">
+        <div class="p-3 rounded-xl bg-slate-850 border border-slate-700/60">
+          <div class="font-bold text-cyan-400 mb-1">週一【語文計算日】（合計約 30 分鐘）</div>
+          <div class="text-slate-300">· 國語改錯字抓蟲狙擊（8分）＋ 數學面積要塞防禦（12分）＋ 英文 EU 5 拔槍（10分）</div>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-850 border border-slate-700/60">
+          <div class="font-bold text-purple-400 mb-1">週二【科學探究與字音日】（合計約 30 分鐘）</div>
+          <div class="text-slate-300">· 國語形近字與多音快射（10分）＋ 自然植物蒸散與空氣燃燒（12分）＋ 英文日常複習（8分）</div>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-850 border border-slate-700/60">
+          <div class="font-bold text-amber-400 mb-1">週三【數理深化與長篇閱讀日】（合計約 30 分鐘）</div>
+          <div class="text-slate-300">· 數學平行四邊形/梯形高底（12分）＋ 國語 7~12 課說明文解碼（10分）＋ 英文過去式（8分）</div>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-850 border border-slate-700/60">
+          <div class="font-bold text-emerald-400 mb-1">週四【史地風雲與錯字大清查】（合計約 30 分鐘）</div>
+          <div class="text-slate-300">· 康軒社會史前遺址與荷西明鄭（12分）＋ 國語高頻改錯狙擊（10分）＋ 自然火災拆彈（8分）</div>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-850 border border-slate-700/60">
+          <div class="font-bold text-rose-400 mb-1">週五【五科綜合大魔王結算日】（合計約 30 分鐘）</div>
+          <div class="text-slate-300">· 終極魔王 100 滴血全科討伐戰（15分）＋ 特權經驗值總結算＆特權卡兌換（15分）</div>
+        </div>
+      </div>
+      <button id="btn-close-schedule-bottom" class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition">
+        關閉課表
+      </button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-slate-950 border-t border-slate-900 py-3 px-4 text-center text-xs text-slate-400">
+    國小五年級學科學霸大冒險 · 康軒國語 7~12 課 / 翰林數學 / Everybody Up 5 Unit 2 專用特訓系統
+  </footer>
+
+  <script>
+    /* =========================================================
+       AUDIO SYNTHESIS SYSTEM (Web Audio API)
+       ========================================================= */
+    class SoundEngine {
+      constructor() {
+        this.ctx = null;
+        this.enabled = true;
+      }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+      toggle() {
+        this.enabled = !this.enabled;
+        return this.enabled;
+      }
+      playTone(freq, type = 'sine', duration = 0.15, vol = 0.12) {
+        if (!this.enabled) return;
+        try {
+          this.init();
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+          gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + duration);
+        } catch (e) {}
+      }
+      playSuccess() {
+        if (!this.enabled) return;
+        this.playTone(523.25, 'triangle', 0.1, 0.15);
+        setTimeout(() => this.playTone(659.25, 'triangle', 0.15, 0.15), 90);
+        setTimeout(() => this.playTone(783.99, 'triangle', 0.25, 0.18), 180);
+      }
+      playHit() {
+        if (!this.enabled) return;
+        this.playTone(880, 'square', 0.08, 0.12);
+        setTimeout(() => this.playTone(1760, 'sine', 0.12, 0.15), 50);
+      }
+      playError() {
+        if (!this.enabled) return;
+        this.playTone(220, 'sawtooth', 0.15, 0.15);
+        setTimeout(() => this.playTone(180, 'sawtooth', 0.25, 0.15), 100);
+      }
+      playLevelUp() {
+        if (!this.enabled) return;
+        [440, 554, 659, 880].forEach((freq, idx) => {
+          setTimeout(() => this.playTone(freq, 'triangle', 0.2, 0.2), idx * 120);
+        });
+      }
+      playClick() {
+        this.playTone(600, 'sine', 0.05, 0.05);
+      }
+    }
+
+    const sound = new SoundEngine();
+
+    /* =========================================================
+       IN-PAGE MODAL SYSTEM (Safe for Canvas iframe)
+       ========================================================= */
+    let modalConfirmCallback = null;
+
+    function openModal(title, message, icon = '✨', onConfirm = null, showCancel = false) {
+      document.getElementById('modal-title').innerText = title;
+      document.getElementById('modal-body').innerText = message;
+      document.getElementById('modal-icon').innerText = icon;
+      modalConfirmCallback = onConfirm;
+
+      const cancelBtn = document.getElementById('modal-btn-cancel');
+      if (showCancel) {
+        cancelBtn.classList.remove('hidden');
+      } else {
+        cancelBtn.classList.add('hidden');
+      }
+
+      document.getElementById('in-page-modal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('in-page-modal').classList.add('hidden');
+      modalConfirmCallback = null;
+    }
+
+    document.getElementById('modal-btn-confirm').addEventListener('click', () => {
+      sound.playClick();
+      const cb = modalConfirmCallback;
+      closeModal();
+      if (cb) cb();
+    });
+
+    document.getElementById('modal-btn-cancel').addEventListener('click', () => {
+      sound.playClick();
+      closeModal();
+    });
+
+    /* =========================================================
+       GAME STATE MANAGEMENT
+       ========================================================= */
+    const state = {
+      agentName: '暗影特工',
+      level: 1,
+      exp: 0,
+      hp: 100,
+      combo: 0,
+      soundEnabled: true,
+      currentMode: null,
+      currentQuestionIdx: 0,
+      timer: null,
+      timeLeft: 45,
+      dailyMinutesPlayed: 0,
+      vaultCards: [
+        { id: 1, title: '免寫 1 題數學作業卡', desc: '可自由指定當日作業中難度最高或最繁瑣的 1 題免寫！', used: false, rarity: 'SSR' },
+        { id: 2, title: '自選 15 分鐘自主休閒卡', desc: '完成當天 30 分鐘特工任務後，無條件享有 15 分鐘自選活動！', used: false, rarity: 'SR' }
+      ]
+    };
+
+    // Load LocalStorage if available
+    try {
+      const saved = localStorage.getItem('grade5_agent_save_v2');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.agentName) state.agentName = parsed.agentName;
+        if (parsed.exp !== undefined) state.exp = parsed.exp;
+        if (parsed.level !== undefined) state.level = parsed.level;
+        if (parsed.vaultCards) state.vaultCards = parsed.vaultCards;
+        if (parsed.dailyMinutesPlayed !== undefined) state.dailyMinutesPlayed = parsed.dailyMinutesPlayed;
+      }
+    } catch(e) {}
+
+    function saveState() {
+      try {
+        localStorage.setItem('grade5_agent_save_v2', JSON.stringify({
+          agentName: state.agentName,
+          exp: state.exp,
+          level: state.level,
+          vaultCards: state.vaultCards,
+          dailyMinutesPlayed: state.dailyMinutesPlayed
+        }));
+      } catch(e) {}
+    }
+
+    function addExp(pts) {
+      state.exp += pts;
+      if (state.exp >= 100) {
+        state.level += 1;
+        state.exp = state.exp % 100;
+        sound.playLevelUp();
+        const newCard = {
+          id: Date.now(),
+          title: `Lv.${state.level} 升級特權：自選課後點心券`,
+          desc: '成功晉升等級！可向長輩或老師指定一份最愛的點心或飲料。',
+          used: false,
+          rarity: 'SSR'
+        };
+        state.vaultCards.push(newCard);
+        renderVault();
+        openModal('🎉 恭喜特工升級！', `你已晉升為 Lv.${state.level} 高階特務！
+獲得全新特權卡：【${newCard.title}】，已存入背包！`, '🎖️');
+      }
+      updateStatsUI();
+      saveState();
+    }
+
+    function updateStatsUI() {
+      document.getElementById('agent-name-display').innerText = state.agentName;
+      document.getElementById('agent-input-name').value = state.agentName;
+      document.getElementById('exp-val').innerText = state.exp;
+      document.getElementById('exp-bar').style.width = `${state.exp}%`;
+      document.getElementById('hp-display').innerText = state.hp;
+      document.getElementById('combo-display').innerText = state.combo;
+      document.getElementById('card-badge').innerText = state.vaultCards.filter(c => !c.used).length;
+      document.getElementById('daily-time-counter').innerText = `${state.dailyMinutesPlayed} / 30 分鐘`;
+      
+      const ranks = ['菜鳥探員', '先鋒特工', '影子精英', '王牌指揮官', '學霸終結者'];
+      const rankIdx = Math.min(Math.floor((state.level - 1) / 2), ranks.length - 1);
+      document.getElementById('agent-rank').innerText = `Lv.${state.level} ${ranks[rankIdx]}`;
+    }
+
+    /* =========================================================
+       QUESTION DATA STORES (Kang Hsuan L7-12, Han Lin Math, EU5)
+       ========================================================= */
+
+    // 1. 國語改錯字【抓蟲狙擊手】題庫
+    const SNIPER_QUESTS = [
+      {
+        title: '任務 1：解密犯罪通緝令（高頻成語陷阱）',
+        text: '這名特工平時按步就班的受訓，面對危難再接再勵，哪怕深入敵營也毫不退縮，立下大功名列前矛。',
+        bugs: [
+          { char: '步', correct: '部', reason: '「按部就班」指依照順序規矩，是部隊門部的「部」。' },
+          { char: '勵', correct: '厲', reason: '「再接再厲」原指鬥雞磨嘴再鬥，是厲害嚴厲的「厲」，非鼓勵的「勵」。' },
+          { char: '矛', correct: '茅', reason: '「名列前茅」古代行軍前鋒持茅草為號，是植物茅草的「茅」，非武器「矛」。' }
+        ]
+      },
+      {
+        title: '任務 2：保護國寶特使（形近字混淆）',
+        text: '館長小心翼翼捧著價值連城的完壁歸趙古玉，靠著牆壁稍作休息，神情急燥的等待警備隊前來支援。',
+        bugs: [
+          { char: '壁', correct: '璧', reason: '「完璧歸趙」指完整無瑕的玉，底下是玉石的「玉」，「壁」底下是泥土的「土」。' },
+          { char: '燥', correct: '躁', reason: '「急躁」形容心情暴躁衝動，是足部的「躁」；「乾燥」才是火部的「燥」。' }
+        ]
+      },
+      {
+        title: '任務 3：法庭與審判情報（辨字與辯論）',
+        text: '辯護律師在法庭上據理力辦，拿出錄音證據仔細辯別，終於替蒙冤的特工洗清了嫌疑。',
+        bugs: [
+          { char: '辦', correct: '爭', reason: '「據理力爭」或「力辯」用「言」部的「辯」；「力辦」是錯別字。' },
+          { char: '辯', correct: '辨', reason: '「辨別」指分辨、判別，中間是有刀剖開的「辨」，言部「辯」是用嘴巴辯駁。' }
+        ]
+      },
+      {
+        title: '任務 4：水壩工程防線（康軒五上第 10 課）',
+        text: '這項大工程必須因地治宜，工人們不分畫夜趕工，川流不息的砂石車穿梭在山谷之間。',
+        bugs: [
+          { char: '治', correct: '制', reason: '「因地制宜」根據不同環境制定合宜辦法，是制定制度的「制」，非治理的「治」。' },
+          { char: '畫', correct: '晝', reason: '「不分晝夜」晝代表白天，上面是「聿」加「日」，非圖畫的「畫」。' }
+        ]
+      }
+,
+      {
+        title: '任務 5：深山古道追擊（康軒五上第 7 課）',
+        text: '特工小隊穿梭在崇山竣嶺之中，隊員們全神慣注警戒四周，絲毫不敢鬆懈怠慢。',
+        bugs: [
+          { char: '竣', correct: '峻', reason: '「崇山峻嶺」指高聳險峻的山嶺，是山字旁的「峻」；工程完畢才是立字旁的「竣」。' },
+          { char: '慣', correct: '貫', reason: '「全神貫注」指精神全神貫穿集中，是貝部的「貫」；習慣才是心部的「慣」。' }
+        ]
+      },
+      {
+        title: '任務 6：宇宙星空探索（康軒五上第 8 課）',
+        text: '面對浩瀚無垠的宇宙，人類個體宛如倉海一栗，但探險家依然迫不急待地啟程追尋真理。',
+        bugs: [
+          { char: '倉', correct: '滄', reason: '「滄海一粟」指青綠色大海，為水部「滄」；倉庫收容才是「倉」。' },
+          { char: '栗', correct: '粟', reason: '「滄海一粟」粟指穀子雜糧，底下是米部「粟」；板栗則是木部「栗」。' },
+          { char: '急', correct: '及', reason: '「迫不及待」急迫得不能等待，「及」是趕得上/來得及，非著急的「急」。' }
+        ]
+      },
+      {
+        title: '任務 7：作戰條例審訊（康軒五上第 9 課）',
+        text: '指揮官要求部隊作戰不可墨守陳規，平時勤練戰術，絕不能等到大敵當前才臨渴決井。',
+        bugs: [
+          { char: '陳', correct: '成', reason: '「墨守成規」指守著現成法規不知變通，是成功的「成」，非陳舊的「陳」。' },
+          { char: '決', correct: '掘', reason: '「臨渴掘井」指口渴才挖井，是手部挖掘的「掘」，非決定勝決的「決」。' }
+        ]
+      },
+      {
+        title: '任務 8：頂尖基地防護（康軒五上第 10 課）',
+        text: '這項實驗掌握著手屈一指的科研成果，團隊付出了刻骨明心的努力，絕不容許外力破壞。',
+        bugs: [
+          { char: '手', correct: '首', reason: '「首屈一指」扳手指排行第一，首代表第一位，是頭部的「首」，非手部的「手」。' },
+          { char: '明', correct: '銘', reason: '「刻骨銘心」銘刻在心骨，是金字旁的「銘」，非光明的「明」。' }
+        ]
+      },
+      {
+        title: '任務 9：都會暗巷追查（康軒五上第 11 課）',
+        text: '大街上車水馬龍且穿流不息，前來觀看盛會的人潮絡譯不絕，嫌犯趁亂越過重重封鎖線。',
+        bugs: [
+          { char: '穿', correct: '川', reason: '「川流不息」形容像河川水流般連綿不絕，是山川的「川」，非穿透的「穿」。' },
+          { char: '譯', correct: '繹', reason: '「絡繹不絕」指人馬往來不斷，是絞絲旁的「繹」，非翻譯的「譯」。' }
+        ]
+      },
+      {
+        title: '任務 10：決戰終局考驗（康軒五上第 12 課）',
+        text: '眾人對新技術趨之若騖爭相引進，但專家警告若忽略核心細節，整套計畫恐將功虧一匱。',
+        bugs: [
+          { char: '騖', correct: '鶩', reason: '「趨之若鶩」像成群野鴨奔向目標，是鳥部的「鶩」；奔馳心不在焉才是馬部的「騖」。' },
+          { char: '匱', correct: '簣', reason: '「功虧一簣」挑土堆山只差最後一筐土，是竹部的盛土筐「簣」，非匱乏的「匱」。' }
+        ]
+      }
+    ];
+
+    // 2. 國語字音字形【快射對決】題庫
+    const PHONETIC_QUESTS = [
+      {
+        question: '請問下列哪一個是【完____歸趙】的正確字形？',
+        options: [
+          { text: '璧（玉部，指美玉）', correct: true, exp: '答對！玉字旁的璧才是美玉！' },
+          { text: '壁（土部，指牆壁）', correct: false, exp: '答錯！土部是牆壁喔！' }
+        ]
+      },
+      {
+        question: '「媽媽個性非常急____」，請問應填入哪一個字？',
+        options: [
+          { text: '燥（火部）', correct: false, exp: '火部燥是口乾舌燥、天氣乾燥！' },
+          { text: '躁（足部）', correct: true, exp: '答對！足部躁代表性急動作急躁！' }
+        ]
+      },
+      {
+        question: '「長官派他去外地【出差】」，請問「差」的正確讀音是？',
+        options: [
+          { text: 'ㄔㄞ (chāi)', correct: true, exp: '答對！出差、差事、郵差讀 ㄔㄞ！' },
+          { text: 'ㄔㄚ (chā)', correct: false, exp: '答錯！ㄔㄚ 是差別、差錯！' },
+          { text: 'ㄘ (cī)', correct: false, exp: '答錯！ㄘ 是參差不齊！' }
+        ]
+      },
+      {
+        question: '「這篇文章【著】重在心理描寫」，請問「著」的讀音是？',
+        options: [
+          { text: 'ㄓㄨㄛˊ (zhuó)', correct: true, exp: '答對！著重、著落、沉著讀 ㄓㄨㄛˊ！' },
+          { text: 'ㄓㄨˋ (zhù)', correct: false, exp: '答錯！ㄓㄨˋ 是著名、著作！' },
+          { text: 'ㄓㄠˊ (zháo)', correct: false, exp: '答錯！ㄓㄠˊ 是睡著了、著涼！' }
+        ]
+      },
+      {
+        question: '「姐妹倆坐在樹下編【扎辮子】」，請問「辮」的中間部首是？',
+        options: [
+          { text: '中間是「絲」（辮子）', correct: true, exp: '答對！頭髮如絲線，中間是絲！' },
+          { text: '中間是「言」（爭辯）', correct: false, exp: '中間言是嘴巴說話爭辯！' },
+          { text: '中間是「刀」（分辨）', correct: false, exp: '中間刀是刀剖分辨！' }
+        ]
+      }
+    ];
+
+    // 3. 英文 Everybody Up 5 Unit 2 過去式題庫 (Fixed apostrophe escaping)
+    const ENGLISH_QUESTS = [
+      {
+        question: 'Agent Q: "Did you wash the dishes yesterday?"<br><span class="text-xs text-slate-400">（特工盤查：你昨天洗碗了嗎？）</span>',
+        options: [
+          { text: 'Yes, I did. I washed the dishes.', correct: true, exp: 'Bingo! Did 問句用 did 回答，過去式動詞加 -ed！' },
+          { text: 'Yes, I do. I wash the dishes.', correct: false, exp: 'Oops! 過去式問句要用 did 回答喔！' },
+          { text: 'No, I did not. I cleans my room.', correct: false, exp: 'Oops! 主詞是 I 且時態不正確。' }
+        ]
+      },
+      {
+        question: 'Commander: "What did Alex do yesterday morning?"<br><span class="text-xs text-slate-400">（指揮官：艾力克斯昨天早上做了什麼？）</span>',
+        options: [
+          { text: 'He cleared the table.', correct: true, exp: 'Great job! 過去式動詞 clear 變 cleared！' },
+          { text: 'He clears the table.', correct: false, exp: '注意！yesterday 代表過去，動詞要變過去式！' },
+          { text: 'He is clearing the table.', correct: false, exp: '這是現在進行式，不是過去式。' }
+        ]
+      },
+      {
+        question: 'Which is the past tense of "take out the trash"?<br><span class="text-xs text-slate-400">（「倒垃圾」的正確過去式是？）</span>',
+        options: [
+          { text: 'took out the trash', correct: true, exp: 'Awesome! take 的過去式是不規則動詞 took！' },
+          { text: 'taked out the trash', correct: false, exp: '沒有 taked 這個字喔！take 是不規則變化。' },
+          { text: 'taking out the trash', correct: false, exp: '這是 V-ing 動名詞或進行式。' }
+        ]
+      },
+      {
+        question: 'Agent: "Did she dust the furniture?"<br><span class="text-xs text-slate-400">（否定簡答：她沒有擦灰塵。）</span>',
+        options: [
+          { text: 'No, she did not.', correct: true, exp: 'Correct! Did 否定簡答為 No, she did not.' },
+          { text: 'No, she does not.', correct: false, exp: '時態錯了！過去式問句要用 did not。' },
+          { text: 'No, she was not.', correct: false, exp: '助動詞用 Did，不用 was。' }
+        ]
+      }
+    ];
+
+    // 4. 翰林數學面積要塞題庫
+    const MATH_QUESTS = [
+      {
+        question: '【平行四邊形要塞】：要塞底長 14 公尺，高 8 公尺。請問這座要塞的防護面積是多少平方公尺？',
+        hint: '公式提示：平行四邊形面積 ＝ 底 × 高',
+        options: [
+          { text: '112 平方公尺 (14 × 8)', correct: true, exp: '答對！平行四邊形面積直接底乘高，不用除以 2！' },
+          { text: '56 平方公尺 ((14 × 8) ÷ 2)', correct: false, exp: '陷阱！除以 2 是三角形的公式，平行四邊形不除以 2！' },
+          { text: '44 平方公尺 (14 × 2 + 8 × 2)', correct: false, exp: '那是周長公式，不是面積！' }
+        ]
+      },
+      {
+        question: '【三角形瞭望塔】：底是 16 公尺，高是 9 公尺。請問面積是多少平方公尺？',
+        hint: '公式提示：三角形面積 ＝ (底 × 高) ÷ 2',
+        options: [
+          { text: '72 平方公尺 ((16 × 9) ÷ 2)', correct: true, exp: '太棒了！記得除以 2，計算完全正確！' },
+          { text: '144 平方公尺 (16 × 9)', correct: false, exp: '踩到陷阱！三角形面積記得一定要「除以 2」！' },
+          { text: '50 平方公尺', correct: false, exp: '計算筆誤囉，16 × 9 ÷ 2 = 72。' }
+        ]
+      },
+      {
+        question: '【梯形核能基地】：上底 7 公尺，下底 13 公尺，高 6 公尺。請問基地的總面積是多少？',
+        hint: '公式提示：梯形面積 ＝ (上底 ＋ 下底) × 高 ÷ 2',
+        options: [
+          { text: '60 平方公尺 ((7 + 13) × 6 ÷ 2)', correct: true, exp: '精準命中！(7+13)=20，20 × 6 ÷ 2 = 60！' },
+          { text: '120 平方公尺 ((7 + 13) × 6)', correct: false, exp: '忘記除以 2 囉！梯形跟三角形一樣都要除以 2！' },
+          { text: '46 平方公尺', correct: false, exp: '公式步驟有誤，括號要先加喔！' }
+        ]
+      }
+    ];
+
+    // 5. 終極魔王關（五科綜合題庫）
+    const BOSS_QUESTS = [
+      {
+        subject: '國語',
+        q: '改錯快拔槍：下列哪一個詞語「沒有」錯別字？',
+        options: [
+          { text: '名列前茅', correct: true, exp: '答對！茅草的茅完全正確！暴擊魔王 25 點血量！' },
+          { text: '再接再勵', correct: false, exp: '錯！應該是再接再「厲」！' },
+          { text: '按步就班', correct: false, exp: '錯！應該是按「部」就班！' }
+        ]
+      },
+      {
+        subject: '數學',
+        q: '一個直角三角形兩股長度分別是 6 公分與 8 公分，斜邊長 10 公分。請問它的面積是多少平方公分？',
+        options: [
+          { text: '24 平方公分 (6 × 8 ÷ 2)', correct: true, exp: '太聰明了！直角三角形兩股互為底和高，不用理會斜邊！暴擊 25 點！' },
+          { text: '40 平方公分 (8 × 10 ÷ 2)', correct: false, exp: '陷阱！斜邊不能當成高！' },
+          { text: '48 平方公分 (6 × 8)', correct: false, exp: '三角形忘記除以 2 囉！' }
+        ]
+      },
+      {
+        subject: '英文',
+        q: 'Everybody Up 5: "Did your brother clean his room?"',
+        options: [
+          { text: 'Yes, he did.', correct: true, exp: 'Awesome! Did 問句代名詞 he 搭配 did！' },
+          { text: 'Yes, he was.', correct: false, exp: '錯！一般動詞用 did 問，就用 did 答。' },
+          { text: 'No, he did not.', correct: false, exp: '這也是否定簡答，但選項請選正確的肯定對稱。' }
+        ]
+      },
+      {
+        subject: '自然',
+        q: '（翰林五上）用雙氧水加胡蘿蔔丁製造出的氣體，能讓線香劇烈燃燒，請問這是什麼氣體？',
+        options: [
+          { text: '氧氣 (O2，具助燃性)', correct: true, exp: '擊碎魔王護盾！氧氣可助燃，能使餘燼復燃！' },
+          { text: '二氧化碳 (CO2，具不可燃性)', correct: false, exp: '二氧化碳會使線香熄滅喔！' },
+          { text: '水蒸氣', correct: false, exp: '水蒸氣不能助燃喔！' }
+        ]
+      },
+      {
+        subject: '社會',
+        q: '（康軒五上）臺灣史前文化中，出土了「煉鐵爐」與大量鐵渣，代表進入金屬器時代的是哪一個文化？',
+        options: [
+          { text: '十三行文化（位於新北八里）', correct: true, exp: '歷史大師！十三行文化就是著名的鐵器時代代表！' },
+          { text: '長濱文化（舊石器時代）', correct: false, exp: '長濱文化是舊石器敲打石器時代！' },
+          { text: '圓山文化（新石器時代貝塚）', correct: false, exp: '圓山文化著名的是貝塚與磨製石器！' }
+        ]
+      }
+    ];
+
+    /* =========================================================
+       UI ROUTER & VIEW MANAGEMENT
+       ========================================================= */
+    const viewHub = document.getElementById('view-hub');
+    const viewGameplay = document.getElementById('view-gameplay');
+    const viewVault = document.getElementById('view-vault');
+
+    function switchView(viewName) {
+      sound.playClick();
+      clearInterval(state.timer);
+      viewHub.classList.add('hidden');
+      viewGameplay.classList.add('hidden');
+      viewVault.classList.add('hidden');
+
+      if (viewName === 'hub') {
+        viewHub.classList.remove('hidden');
+        updateStatsUI();
+      } else if (viewName === 'gameplay') {
+        viewGameplay.classList.remove('hidden');
+      } else if (viewName === 'vault') {
+        viewVault.classList.remove('hidden');
+        renderVault();
+      }
+    }
+
+    /* =========================================================
+       SNIPER MODE (改錯字抓蟲狙擊手)
+       ========================================================= */
+    let currentSniperQuest = null;
+    let foundBugsInStage = [];
+
+    function startSniperMode() {
+      state.currentMode = 'sniper';
+      state.currentQuestionIdx = 0;
+      switchView('gameplay');
+      document.getElementById('current-mode-tag').innerText = '🎯 國語【抓蟲狙擊手】';
+      document.getElementById('current-mode-tag').className = 'text-xs font-bold px-2.5 py-1 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30';
+      loadSniperQuest();
+    }
+
+    function loadSniperQuest() {
+      const q = SNIPER_QUESTS[state.currentQuestionIdx];
+      currentSniperQuest = q;
+      foundBugsInStage = [];
+
+      document.getElementById('stage-round').innerText = `第 ${state.currentQuestionIdx + 1}/${SNIPER_QUESTS.length} 關`;
+      document.getElementById('btn-next-question').classList.add('hidden');
+      document.getElementById('btn-hint-support').classList.remove('hidden');
+      document.getElementById('solution-box').classList.add('hidden');
+      document.getElementById('solution-box').innerHTML = '';
+      document.getElementById('feedback-msg').innerHTML = `<span class="text-cyan-400 font-bold">任務目標：</span> 請在下方短文中找出 <strong class="text-amber-300 font-black">${q.bugs.length} 隻錯字蟲</strong>，點擊文字立即狙擊！`;
+
+      const promptArea = document.getElementById('game-prompt-area');
+      promptArea.innerHTML = `
+        <div class="flex items-center justify-between">
+          <h3 class="text-base font-bold text-white flex items-center gap-2">
+            <span>🔍</span> <span>${q.title}</span>
+          </h3>
+          <span class="text-xs bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700">
+            剩餘蟲害：<strong id="remaining-bugs" class="text-amber-400 font-bold">${q.bugs.length}</strong> 隻
+          </span>
+        </div>
+      `;
+
+      const interactiveArea = document.getElementById('game-interactive-area');
+      let html = `<div class="bg-slate-950 p-6 md:p-8 rounded-2xl border border-slate-800 text-xl md:text-2xl leading-loose md:leading-[3rem] tracking-wider font-semibold text-slate-100">`;
+      for (let i = 0; i < q.text.length; i++) {
+        const char = q.text[i];
+        if (/[，。、！？「」\s]/.test(char)) {
+          html += `<span class="text-slate-500 px-0.5">${char}</span>`;
+        } else {
+          html += `<span class="sniper-char" data-idx="${i}" data-char="${char}">${char}</span>`;
+        }
+      }
+      html += `</div>`;
+      interactiveArea.innerHTML = html;
+
+      const charElements = interactiveArea.querySelectorAll('.sniper-char');
+      charElements.forEach(el => {
+        el.addEventListener('click', () => handleCharClick(el));
+      });
+
+      startTimer(45);
+    }
+
+    function handleCharClick(el) {
+      const char = el.getAttribute('data-char');
+      const bugMatch = currentSniperQuest.bugs.find(b => b.char === char && !foundBugsInStage.includes(b));
+
+      if (bugMatch) {
+        sound.playHit();
+        foundBugsInStage.push(bugMatch);
+        el.classList.add('hit-correct');
+        el.innerText = `${bugMatch.correct}`;
+        state.combo += 1;
+        addExp(15);
+
+        const rem = currentSniperQuest.bugs.length - foundBugsInStage.length;
+        document.getElementById('remaining-bugs').innerText = rem;
+
+        document.getElementById('feedback-msg').innerHTML = `
+          <span class="text-emerald-400 font-bold">🎯 擊殺成功！</span> 
+          把「<strong class="text-rose-400">${bugMatch.char}</strong>」更正為「<strong class="text-emerald-400">${bugMatch.correct}</strong>」！
+          <span class="text-slate-400 text-xs hidden sm:inline">(${bugMatch.reason})</span>
+        `;
+
+        if (rem === 0) {
+          sound.playSuccess();
+          clearInterval(state.timer);
+          document.getElementById('feedback-msg').innerHTML += ` <strong class="text-amber-300">★ 本關全部錯字清除完畢！</strong>`;
+          document.getElementById('btn-next-question').classList.remove('hidden');
+        }
+      } else {
+        sound.playError();
+        state.combo = 0;
+        state.hp = Math.max(0, state.hp - 5);
+        updateStatsUI();
+        el.classList.add('hit-wrong');
+        setTimeout(() => el.classList.remove('hit-wrong'), 300);
+
+        document.getElementById('feedback-msg').innerHTML = `
+          <span class="text-rose-400 font-bold">⚠️ 未命中害蟲！</span> 
+          「${char}」沒有錯喔！護盾 -5，請看清楚筆畫與部首！
+        `;
+      }
+    }
+
+    /* =========================================================
+       STANDARD CHOICE MODE (Phonetic, English, Math, Boss)
+       ========================================================= */
+    let currentQuestions = [];
+
+    function startChoiceMode(modeName, questList, tagText, tagClass) {
+      state.currentMode = modeName;
+      state.currentQuestionIdx = 0;
+      currentQuestions = questList;
+      switchView('gameplay');
+
+      const tag = document.getElementById('current-mode-tag');
+      tag.innerText = tagText;
+      tag.className = `text-xs font-bold px-2.5 py-1 rounded-full ${tagClass}`;
+
+      loadChoiceQuest();
+    }
+
+    function loadChoiceQuest() {
+      const q = currentQuestions[state.currentQuestionIdx];
+      document.getElementById('stage-round').innerText = `第 ${state.currentQuestionIdx + 1}/${currentQuestions.length} 關`;
+      document.getElementById('btn-next-question').classList.add('hidden');
+      document.getElementById('btn-hint-support').classList.add('hidden');
+      document.getElementById('solution-box').classList.add('hidden');
+      document.getElementById('solution-box').innerHTML = '';
+      document.getElementById('feedback-msg').innerHTML = `請分析題目並點擊最精準的特工指令...`;
+
+      const promptArea = document.getElementById('game-prompt-area');
+      promptArea.innerHTML = `
+        <div class="space-y-2">
+          ${q.subject ? `<span class="text-xs px-2 py-0.5 rounded bg-red-500/20 text-red-300 font-bold border border-red-500/30">【${q.subject}】</span>` : ''}
+          <h3 class="text-lg md:text-2xl font-bold text-white leading-relaxed">
+            ${q.question || q.q}
+          </h3>
+          ${q.hint ? `<p class="text-sm md:text-base text-amber-400/90 bg-amber-500/10 px-3.5 py-2 rounded-xl border border-amber-500/20 inline-block font-mono font-medium">💡 ${q.hint}</p>` : ''}
+        </div>
+      `;
+
+      const interactiveArea = document.getElementById('game-interactive-area');
+      let html = `<div class="grid grid-cols-1 gap-3">`;
+      q.options.forEach((opt, idx) => {
+        html += `
+          <button class="choice-btn w-full text-left p-4 md:p-5 rounded-2xl bg-slate-850 hover:bg-slate-800 border border-slate-700/80 hover:border-cyan-400/50 transition font-semibold text-slate-100 text-base md:text-xl flex items-center justify-between group" data-idx="${idx}">
+            <div class="flex items-center space-x-3.5">
+              <span class="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-slate-800 border border-slate-700 text-sm md:text-base flex items-center justify-center font-black text-cyan-400 group-hover:bg-cyan-500 group-hover:text-slate-950 transition">
+                ${String.fromCharCode(65 + idx)}
+              </span>
+              <span class="leading-snug">${opt.text}</span>
+            </div>
+            <span class="text-slate-400 group-hover:text-cyan-400 text-sm font-bold">選擇 ➔</span>
+          </button>
+        `;
+      });
+      html += `</div>`;
+      interactiveArea.innerHTML = html;
+
+      const buttons = interactiveArea.querySelectorAll('.choice-btn');
+      buttons.forEach(btn => {
+        btn.addEventListener('click', () => handleChoiceClick(btn, q));
+      });
+
+      startTimer(30);
+    }
+
+    function handleChoiceClick(btn, q) {
+      clearInterval(state.timer);
+      const idx = parseInt(btn.getAttribute('data-idx'));
+      const selected = q.options[idx];
+      const allButtons = document.querySelectorAll('.choice-btn');
+      allButtons.forEach(b => b.disabled = true);
+
+      const correctIdx = q.options.findIndex(opt => opt.correct);
+      const correctOpt = q.options[correctIdx];
+      const correctLetter = String.fromCharCode(65 + correctIdx);
+      const chosenLetter = String.fromCharCode(65 + idx);
+
+      const solBox = document.getElementById('solution-box');
+
+      if (selected.correct) {
+        sound.playSuccess();
+        btn.classList.add('bg-emerald-950/70', 'border-emerald-400', 'text-emerald-200');
+        state.combo += 1;
+        addExp(20);
+
+        document.getElementById('feedback-msg').innerHTML = `
+          <span class="text-emerald-400 font-bold text-base">✅ 判斷正確！</span> 
+          <span class="text-slate-200">連續命中 +1！</span>
+        `;
+
+        solBox.className = 'my-4 p-4 md:p-5 rounded-2xl bg-emerald-950/40 border-2 border-emerald-500/70 shadow-xl text-left space-y-2';
+        solBox.innerHTML = `
+          <div class="flex items-center gap-2 text-base md:text-lg font-bold text-emerald-300">
+            <span>🎯 答題完全正確！</span>
+            <span class="text-xs bg-emerald-500/20 px-2 py-0.5 rounded border border-emerald-500/30">(${correctLetter}) ${correctOpt.text}</span>
+          </div>
+          <div class="text-sm md:text-base text-slate-200 leading-relaxed pt-1 border-t border-slate-800">
+            <strong class="text-amber-300">【名師解析與要點總結】：</strong> ${correctOpt.exp}
+          </div>
+        `;
+        solBox.classList.remove('hidden');
+      } else {
+        sound.playError();
+        btn.classList.add('bg-rose-950/70', 'border-rose-500', 'text-rose-200');
+        state.combo = 0;
+        state.hp = Math.max(0, state.hp - 10);
+        updateStatsUI();
+
+        if (allButtons[correctIdx]) {
+          allButtons[correctIdx].classList.add('border-2', 'border-emerald-400', 'bg-emerald-950/60', 'text-emerald-200');
+        }
+
+        document.getElementById('feedback-msg').innerHTML = `
+          <span class="text-rose-400 font-bold text-base">❌ 選擇錯誤！</span> 
+          <span class="text-slate-300">護盾 -10，請詳閱下方正確答案與名師解析！</span>
+        `;
+
+        solBox.className = 'my-4 p-4 md:p-5 rounded-2xl bg-slate-900 border-2 border-amber-500/80 shadow-2xl text-left space-y-3';
+        solBox.innerHTML = `
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2">
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-1 rounded-lg bg-emerald-500 text-slate-950 font-black text-xs md:text-sm">💡 正確解答</span>
+              <span class="text-emerald-300 font-extrabold text-base md:text-lg">(${correctLetter}) ${correctOpt.text}</span>
+            </div>
+            <span class="text-xs text-rose-400 font-medium">你選擇的是：(${chosenLetter})</span>
+          </div>
+          <div class="text-sm md:text-base text-slate-200 leading-relaxed">
+            <div class="text-amber-300 font-bold mb-1">【名師詳解與避坑指南】：</div>
+            <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 text-slate-100 font-medium">${correctOpt.exp}</div>
+          </div>
+          ${selected.exp ? `
+            <div class="text-xs md:text-sm text-slate-400 pt-1">
+              <span class="text-rose-300 font-semibold">⚠️ 錯誤選項剖析：</span> ${selected.exp}
+            </div>` : ''}
+        `;
+        solBox.classList.remove('hidden');
+      }
+
+      document.getElementById('btn-next-question').classList.remove('hidden');
+    }
+
+    function revealChoiceSolution() {
+      const q = currentQuestions[state.currentQuestionIdx];
+      const correctIdx = q.options.findIndex(opt => opt.correct);
+      const correctOpt = q.options[correctIdx];
+      const correctLetter = String.fromCharCode(65 + correctIdx);
+      const allButtons = document.querySelectorAll('.choice-btn');
+      allButtons.forEach(b => b.disabled = true);
+
+      if (allButtons[correctIdx]) {
+        allButtons[correctIdx].classList.add('border-2', 'border-emerald-400', 'bg-emerald-950/60', 'text-emerald-200');
+      }
+
+      const solBox = document.getElementById('solution-box');
+      solBox.className = 'my-4 p-4 md:p-5 rounded-2xl bg-slate-900 border-2 border-amber-500/80 shadow-2xl text-left space-y-3';
+      solBox.innerHTML = `
+        <div class="flex items-center gap-2 border-b border-slate-800 pb-2">
+          <span class="px-2.5 py-1 rounded-lg bg-emerald-500 text-slate-950 font-black text-xs md:text-sm">💡 正確解答</span>
+          <span class="text-emerald-300 font-extrabold text-base md:text-lg">(${correctLetter}) ${correctOpt.text}</span>
+        </div>
+        <div class="text-sm md:text-base text-slate-200 leading-relaxed">
+          <div class="text-amber-300 font-bold mb-1">【名師詳解與避坑指南】：</div>
+          <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 text-slate-100 font-medium">${correctOpt.exp}</div>
+        </div>
+      `;
+      solBox.classList.remove('hidden');
+    }
+
+    function revealSniperSolution() {
+      clearInterval(state.timer);
+      const q = currentSniperQuest;
+      const charElements = document.querySelectorAll('.sniper-char');
+      
+      q.bugs.forEach(bug => {
+        charElements.forEach(el => {
+          if (el.getAttribute('data-char') === bug.char) {
+            el.classList.add('hit-correct');
+            el.innerText = `${bug.correct}`;
+          }
+        });
+      });
+
+      document.getElementById('remaining-bugs').innerText = '0';
+      document.getElementById('btn-hint-support').classList.add('hidden');
+      document.getElementById('btn-next-question').classList.remove('hidden');
+
+      const solBox = document.getElementById('solution-box');
+      solBox.className = 'my-4 p-4 md:p-5 rounded-2xl bg-slate-900 border-2 border-amber-500/80 shadow-2xl text-left space-y-3';
+      
+      let bugsHtml = '';
+      q.bugs.forEach((bug, idx) => {
+        bugsHtml += `
+          <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="text-xs px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 font-bold">錯字 ${idx + 1}</span>
+              <span class="text-rose-400 line-through font-bold text-base md:text-lg">${bug.char}</span>
+              <span class="text-slate-400 font-bold">➔</span>
+              <span class="text-emerald-400 font-black text-lg md:text-xl">正確應為「${bug.correct}」</span>
+            </div>
+            <div class="text-xs md:text-sm text-slate-300 leading-relaxed font-medium">
+              <span class="text-amber-300 font-bold">【字形口訣與解析】：</span> ${bug.reason}
+            </div>
+          </div>
+        `;
+      });
+
+      solBox.innerHTML = `
+        <div class="flex items-center gap-2 border-b border-slate-800 pb-2">
+          <span class="px-2.5 py-1 rounded-lg bg-cyan-500 text-slate-950 font-black text-xs md:text-sm">🔍 本關錯字完整解析</span>
+          <span class="text-cyan-300 font-bold text-sm">共有 ${q.bugs.length} 處陷阱字</span>
+        </div>
+        <div class="space-y-2.5">
+          ${bugsHtml}
+        </div>
+      `;
+      solBox.classList.remove('hidden');
+
+      document.getElementById('feedback-msg').innerHTML = `
+        <span class="text-amber-400 font-bold">💡 戰術支援完成！</span> 
+        <span>已為你標記短文正確字形，請仔細閱讀下方解析口訣！</span>
+      `;
+    }
+
+    /* =========================================================
+       TIMER CONTROLLER
+       ========================================================= */
+    function startTimer(seconds) {
+      clearInterval(state.timer);
+      state.timeLeft = seconds;
+      const timerEl = document.getElementById('game-timer');
+      timerEl.innerText = `${state.timeLeft}s`;
+
+      state.timer = setInterval(() => {
+        state.timeLeft -= 1;
+        timerEl.innerText = `${state.timeLeft}s`;
+
+        if (state.timeLeft <= 0) {
+          clearInterval(state.timer);
+          sound.playError();
+          document.getElementById('feedback-msg').innerHTML = `<span class="text-rose-400 font-bold">⏰ 時間到！</span> 已為你公佈正確答案與名師解析，請檢討後進入下一題。`;
+          document.getElementById('btn-next-question').classList.remove('hidden');
+          document.querySelectorAll('.choice-btn, .sniper-char').forEach(el => el.style.pointerEvents = 'none');
+          if (state.currentMode === 'sniper') {
+            revealSniperSolution();
+          } else {
+            revealChoiceSolution();
+          }
+        }
+      }, 1000);
+    }
+
+    /* =========================================================
+       NAVIGATION & NEXT QUESTION DISPATCHER
+       ========================================================= */
+    document.getElementById('btn-next-question').addEventListener('click', () => {
+      sound.playClick();
+      state.currentQuestionIdx += 1;
+
+      if (state.currentMode === 'sniper') {
+        if (state.currentQuestionIdx < SNIPER_QUESTS.length) {
+          loadSniperQuest();
+        } else {
+          finishStage('國語【抓蟲狙擊手】');
+        }
+      } else {
+        if (state.currentQuestionIdx < currentQuestions.length) {
+          loadChoiceQuest();
+        } else {
+          finishStage(document.getElementById('current-mode-tag').innerText);
+        }
+      }
+    });
+
+    function finishStage(modeName) {
+      sound.playLevelUp();
+      state.hp = 100;
+      state.dailyMinutesPlayed = Math.min(30, state.dailyMinutesPlayed + 10);
+      addExp(50);
+      saveState();
+
+      openModal('🏆 副本全通關！', `恭喜完成【${modeName}】全數考驗！
+戰果結算：
+- 獲得經驗值 +50 EXP
+- 戰鬥護盾全額修復
+- 今日遊戲進度累計：${state.dailyMinutesPlayed} / 30 分鐘！`, '🎖️', () => {
+        switchView('hub');
+      });
+    }
+
+    /* =========================================================
+       PRIVILEGE VAULT (BACKPACK) RENDERER
+       ========================================================= */
+    function renderVault() {
+      const grid = document.getElementById('vault-cards-grid');
+      grid.innerHTML = '';
+
+      if (state.vaultCards.length === 0) {
+        grid.innerHTML = `<div class="col-span-full text-center text-slate-500 py-8">目前背包空空如也，快去挑戰副本解鎖特權卡！</div>`;
+        return;
+      }
+
+      state.vaultCards.forEach(card => {
+        const div = document.createElement('div');
+        div.className = `p-4 rounded-xl border flex flex-col justify-between transition ${card.used ? 'bg-slate-900/40 border-slate-800 text-slate-500 opacity-60' : 'bg-gradient-to-br from-slate-850 to-slate-900 border-amber-500/40 neon-border-amber text-slate-100'}`;
+        div.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs px-2 py-0.5 rounded font-black ${card.used ? 'bg-slate-800 text-slate-500' : 'bg-amber-500 text-slate-950'}">${card.rarity || 'SSR'}</span>
+              <span class="text-xs ${card.used ? 'text-slate-600' : 'text-amber-400 font-semibold'}">${card.used ? '已核銷兌換' : '可立即使用'}</span>
+            </div>
+            <h4 class="font-bold text-base ${card.used ? 'line-through text-slate-500' : 'text-amber-300'}">${card.title}</h4>
+            <p class="text-xs text-slate-400 mt-2 leading-relaxed">${card.desc}</p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-800 flex justify-end">
+            ${card.used ? 
+              '<span class="text-xs text-slate-600 italic">已被老師/家長核銷</span>' : 
+              `<button class="btn-use-card text-xs px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-black transition" data-id="${card.id}">向長輩出示核銷</button>`
+            }
+          </div>
+        `;
+        grid.appendChild(div);
+      });
+
+      grid.querySelectorAll('.btn-use-card').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = parseInt(btn.getAttribute('data-id'));
+          const target = state.vaultCards.find(c => c.id === id);
+          if (target) {
+            openModal(
+              '確認核銷特權卡',
+              `確認要向老師或家長兌換這張【${target.title}】嗎？
+兌換後該卡片將標記為已使用。`,
+              '🎫',
+              () => {
+                sound.playSuccess();
+                target.used = true;
+                renderVault();
+                updateStatsUI();
+                saveState();
+              },
+              true
+            );
+          }
+        });
+      });
+    }
+
+    // Add Custom Card Handler
+    document.getElementById('btn-add-custom-card').addEventListener('click', () => {
+      const input = document.getElementById('custom-card-input');
+      const val = input.value.trim();
+      if (!val) {
+        openModal('提示', '請先輸入特權名稱！', '⚠️');
+        return;
+      }
+      sound.playClick();
+      state.vaultCards.push({
+        id: Date.now(),
+        title: val,
+        desc: '由老師或家長親自加簽的專屬獎勵！',
+        used: false,
+        rarity: 'UR'
+      });
+      input.value = '';
+      renderVault();
+      updateStatsUI();
+      saveState();
+      openModal('特權卡登錄成功！', `已新增【${val}】到特權背包中！`, '🎁');
+    });
+
+    /* =========================================================
+       SCHEDULE MODAL CONTROLS
+       ========================================================= */
+    const schedModal = document.getElementById('schedule-modal');
+    document.getElementById('btn-view-schedule').addEventListener('click', () => {
+      sound.playClick();
+      schedModal.classList.remove('hidden');
+    });
+    document.getElementById('btn-close-schedule').addEventListener('click', () => {
+      sound.playClick();
+      schedModal.classList.add('hidden');
+    });
+    document.getElementById('btn-close-schedule-bottom').addEventListener('click', () => {
+      sound.playClick();
+      schedModal.classList.add('hidden');
+    });
+
+    // Start Daily Routine Button (Triggers Sniper mode first)
+    document.getElementById('btn-start-daily-routine').addEventListener('click', () => {
+      sound.playClick();
+      openModal(
+        '🚀 啟動今日 30 分鐘特戰！',
+        '本日作戰順序：\n1. 國語【抓蟲狙擊手】(8分鐘)\n2. 翰林數學【要塞面積防線】(12分鐘)\n3. 英文 EU 5【過去式快拔槍】(10分鐘)\n\n準備好立即進入第 1 關！',
+        '⏱️',
+        () => {
+          startSniperMode();
+        }
+      );
+    });
+
+    /* =========================================================
+       BUTTON EVENT BINDINGS
+       ========================================================= */
+    document.getElementById('btn-mode-sniper').addEventListener('click', startSniperMode);
+    
+    document.getElementById('btn-mode-phonetic').addEventListener('click', () => {
+      startChoiceMode('phonetic', PHONETIC_QUESTS, '⚡ 國語【字音字形快射】', 'bg-purple-500/20 text-purple-300 border border-purple-500/30');
+    });
+
+    document.getElementById('btn-mode-english').addEventListener('click', () => {
+      startChoiceMode('english', ENGLISH_QUESTS, '🔫 英文【EU 5 過去式拔槍】', 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30');
+    });
+
+    document.getElementById('btn-mode-math').addEventListener('click', () => {
+      startChoiceMode('math', MATH_QUESTS, '📐 數學【要塞面積防線】', 'bg-amber-500/20 text-amber-300 border border-amber-500/30');
+    });
+
+    document.getElementById('btn-mode-boss').addEventListener('click', () => {
+      startChoiceMode('boss', BOSS_QUESTS, '👾 【終極魔王血條戰】', 'bg-red-500/20 text-red-300 border border-red-500/30');
+    });
+
+    document.getElementById('btn-hint-support').addEventListener('click', () => {
+      sound.playClick();
+      revealSniperSolution();
+    });
+
+    // Navigation Buttons
+    document.getElementById('btn-back-hub').addEventListener('click', () => switchView('hub'));
+    document.getElementById('btn-vault-back').addEventListener('click', () => switchView('hub'));
+    document.getElementById('vault-nav-btn').addEventListener('click', () => switchView('vault'));
+
+    // Sound Toggle
+    document.getElementById('sound-btn').addEventListener('click', () => {
+      const active = sound.toggle();
+      document.getElementById('sound-icon').innerText = active ? '🔊' : '🔇';
+    });
+
+    // Agent Name Update
+    document.getElementById('update-name-btn').addEventListener('click', () => {
+      const val = document.getElementById('agent-input-name').value.trim();
+      if (val) {
+        state.agentName = val;
+        sound.playClick();
+        updateStatsUI();
+        saveState();
+        openModal('代號更新成功', `特工代號已更新為：${val}`, '👤');
+      }
+    });
+
+    // Initialize UI on load
+    updateStatsUI();
+    renderVault();
+  </script>
+</body>
+</html>
